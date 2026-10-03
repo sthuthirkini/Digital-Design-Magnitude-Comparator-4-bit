@@ -1,34 +1,55 @@
-```systemverilog
-module comparator_4bit (
-    input  logic [3:0] A,
-    input  logic [3:0] B,
-    output logic G,
-    output logic E,
-    output logic L
-);
+module tb_comparator_4bit;
 
-    logic E3, E2, E1, E0;
+    logic [3:0] A;
+    logic [3:0] B;
+    logic G, E, L;
 
-    // Equality of individual bits
-    assign E3 = ~(A[3] ^ B[3]);
-    assign E2 = ~(A[2] ^ B[2]);
-    assign E1 = ~(A[1] ^ B[1]);
-    assign E0 = ~(A[0] ^ B[0]);
+    // DUT
+    comparator_4bit uut (
+        .A(A),
+        .B(B),
+        .G(G),
+        .E(E),
+        .L(L)
+    );
 
-    // A > B
-    assign G = (A[3] & ~B[3]) |
-               (E3 & A[2] & ~B[2]) |
-               (E3 & E2 & A[1] & ~B[1]) |
-               (E3 & E2 & E1 & A[0] & ~B[0]);
+    initial begin
 
-    // A = B
-    assign E = E3 & E2 & E1 & E0;
+        $monitor("A = %b | B = %b | G = %b | E = %b | L = %b",
+                 A, B, G, E, L);
 
-    // A < B
-    assign L = (~A[3] & B[3]) |
-               (E3 & ~A[2] & B[2]) |
-               (E3 & E2 & ~A[1] & B[1]) |
-               (E3 & E2 & E1 & ~A[0] & B[0]);
+        // A > B
+        A = 4'b1010;
+        B = 4'b0111;
+        #10;
+
+        // A < B
+        A = 4'b0101;
+        B = 4'b1001;
+        #10;
+
+        // A = B
+        A = 4'b1010;
+        B = 4'b1010;
+        #10;
+
+        // MSB decides
+        A = 4'b1000;
+        B = 4'b0111;
+        #10;
+
+        // LSB decides
+        A = 4'b1001;
+        B = 4'b1000;
+        #10;
+
+        // Another equal case
+        A = 4'b0000;
+        B = 4'b0000;
+        #10;
+
+        $finish;
+    end
 
 endmodule
-```
+
